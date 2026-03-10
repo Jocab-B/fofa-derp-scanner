@@ -1,0 +1,15 @@
+# Ignore macOS files
+.DS_Store
+
+# Ignore actual data and configuration files to protect user data
+config/*.json
+config/*.html
+*.json
+*.html
+
+# Allow .gitkeep to keep the config directory
+!config/.gitkeep
+
+# Ignore Python cache
+__pycache__/
+*.pyc
