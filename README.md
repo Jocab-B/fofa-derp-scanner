@@ -11,7 +11,7 @@
 1. **信息收集（FOFA）**：从 FOFA 获取符合条件的 DERP 节点 IP 及端口信息。
 2. **格式转换**：将 FOFA 导出的 JSON 资产转换成 DERP Prober 需要的标准 `derp.json` 格式。
 3. **探测存活**：使用 docker 容器 `tailscale-derpprober` 对节点进行大批量并发探测。
-4. **结果提取**：提取探测成功的优质节点，并按 ID 范围进行格式化。
+4. **结果提取**：提取稳定、低延迟的 mesh 节点，按延迟排序并连续重新编号。
 5. **合入应用**：将生成的结果复制到 Tailscale 管理后台，供设备使用。
 
 ## 第一步：信息收集 (FOFA)
@@ -68,10 +68,9 @@ python3 scripts/extract_success.py \
   --html /path/to/success_report.html \
   --json config/derp.json \
   --output config/derp-success-prober.json \
-  --start 900 \
-  --end 999
+  --start 900
 ```
-*(在这个例子中，我们只保留 Region ID 在 900 到 999 之间的节点，你可以通过 `--start` 和 `--end` 参数自定义)*
+*(仅保留当前及近期探测全部成功、最新延迟和近期中位延迟均小于 100 ms 的 mesh 节点。结果按最新延迟升序排列，并从 `--start` 开始连续重新编号。)*
 
 运行完毕后，最终筛选出的高质量节点配置就躺在 `config/derp-success-prober.json` 里了！
 
@@ -95,7 +94,7 @@ python3 scripts/extract_success.py \
 ```
 4. 点击 **Save** 保存。
 
-## 常见问题与维护维护
+## 常见问题与维护
 
 如果你在使用过程中发现网络卡顿，中继 (relay) 无法连通：
 

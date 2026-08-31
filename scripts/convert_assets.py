@@ -1,14 +1,17 @@
 import json
 import argparse
-import sys
+
 
 def convert_asset_to_derp(input_file, output_file, start_region_id=900):
-    try:
-        with open(input_file, 'r', encoding='utf-8') as f:
+    with open(input_file, 'r', encoding='utf-8') as f:
+        try:
             assets = json.load(f)
-    except Exception as e:
-        print(f"Error reading input file: {e}")
-        return
+        except json.JSONDecodeError:
+            f.seek(0)
+            assets = [json.loads(line) for line in f if line.strip()]
+
+    if isinstance(assets, dict):
+        assets = [assets]
 
     derp_data = {"Regions": {}}
     current_region_id = start_region_id
@@ -52,14 +55,11 @@ def convert_asset_to_derp(input_file, output_file, start_region_id=900):
         derp_data["Regions"][region_id_str] = region
         current_region_id += 1
 
-    try:
-        with open(output_file, 'w', encoding='utf-8') as f:
-            json.dump(derp_data, f, indent=4, ensure_ascii=False)
-        print(f"Successfully converted {len(derp_data['Regions'])} nodes.")
-        print(f"Region IDs used: {start_region_id} to {current_region_id - 1}")
-        print(f"Saved to {output_file}")
-    except Exception as e:
-        print(f"Error writing output file: {e}")
+    with open(output_file, 'w', encoding='utf-8') as f:
+        json.dump(derp_data, f, indent=4, ensure_ascii=False)
+    print(f"Successfully converted {len(derp_data['Regions'])} nodes.")
+    print(f"Region IDs used: {start_region_id} to {current_region_id - 1}")
+    print(f"Saved to {output_file}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Convert FOFA JSON assets to DERP map JSON.')
